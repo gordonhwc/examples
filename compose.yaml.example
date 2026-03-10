@@ -1,0 +1,101 @@
+services:
+  app:
+    # 1) Identity and lifecycle
+    image: your-image:tag
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    container_name: your-container-name
+    profiles:  # Controls whether the service starts
+      - prod
+    restart: unless-stopped  # Usually placed near name or image
+
+    # 2) Startup and dependencies
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["your", "command"]
+    entrypoint: ["your-entrypoint"]
+    working_dir: /app
+    user: "1000:1000"
+    init: true  # Helps handle PID 1 zombie processes
+    tty: true
+    stdin_open: true
+
+    # 3) Networking
+    hostname: your-hostname
+    networks:
+      - backend
+    ports:
+      - "8080:8080"
+    expose:
+      - "8080"
+
+    # 4) Environment
+    env_file:
+      - .env
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+
+    # 5) Storage and mounts
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config:ro
+    tmpfs:
+      - /tmp
+
+    # 6) Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    # 7) Resource limits and security
+    deploy:  # Standard way to set CPU and memory limits
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+    read_only: true
+    shm_size: "256m"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+    # 8) Logging and metadata
+    logging:  # Strongly recommended to avoid filling the disk
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      com.example.service: app
+
+  db:
+    image: postgres:16
+    container_name: app-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  db-data:
