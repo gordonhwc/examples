@@ -1,0 +1,80 @@
+# Core connection
+client
+dev tun
+proto udp
+remote vpn.example.com 1194
+# remote vpn-backup.example.com 1194  # Backup remote
+# remote-random  # Randomize remote selection
+socks-proxy 127.0.0.1 1082  # Proxy for server connection
+
+
+# Connection behavior & state
+resolv-retry infinite
+nobind
+persist-key
+persist-tun
+explicit-exit-notify 1  # Notify server on clean UDP exit
+# keepalive 10 60  # Ping every 10s, restart after 60s timeout
+
+
+# Identity & credentials
+# Identity files first, then user credentials
+ca /path/to/ca.crt
+cert /path/to/client.crt
+key /path/to/client.key
+tls-crypt /path/to/tc.key  # Encrypt control channel
+# tls-auth /path/to/ta.key 1  # Alternative for older servers
+auth-user-pass  # Prompt for username and password
+
+
+# Cryptography & verification
+# Data channel ciphers
+data-ciphers AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305
+data-ciphers-fallback AES-256-CBC  # Fallback for older servers
+auth SHA256  # HMAC for control channel
+
+# Server verification
+tls-client  # Operate in TLS client mode
+tls-version-min 1.2  # Require TLS 1.2 or newer
+remote-cert-tls server  # Verify server certificate usage
+verify-x509-name server.example.com name
+
+
+# Routing & network traffic
+redirect-gateway def1 bypass-dhcp  # Route all traffic, keep DHCP reachable
+dhcp-option DNS 1.1.1.1
+dhcp-option DNS 8.8.8.8
+# block-outside-dns  # Windows only, helps prevent DNS leaks
+
+
+# Logging & debugging
+verb 3
+mute 20
+# status /path/to/openvpn-status.log
+# log-append /path/to/openvpn.log  # Optional client log file
+
+
+# Inline certificates
+# <ca>
+# -----BEGIN CERTIFICATE-----
+# PLACEHOLDER
+# -----END CERTIFICATE-----
+# </ca>
+#
+# <cert>
+# -----BEGIN CERTIFICATE-----
+# PLACEHOLDER
+# -----END CERTIFICATE-----
+# </cert>
+#
+# <key>
+# -----BEGIN PRIVATE KEY-----
+# PLACEHOLDER
+# -----END PRIVATE KEY-----
+# </key>
+#
+# <tls-crypt>
+# -----BEGIN OpenVPN Static key V1-----
+# PLACEHOLDER
+# -----END OpenVPN Static key V1-----
+# </tls-crypt>
