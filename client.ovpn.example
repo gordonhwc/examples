@@ -24,7 +24,7 @@ cert /path/to/client.crt
 key /path/to/client.key
 tls-crypt /path/to/tc.key  # Encrypt control channel
 # tls-auth /path/to/ta.key 1  # Alternative for older servers
-auth-user-pass  # Prompt for username and password
+auth-user-pass  # Use inline username and password
 
 
 # Cryptography & verification
@@ -54,7 +54,12 @@ mute 20
 # log-append /path/to/openvpn.log  # Optional client log file
 
 
-# Inline certificates
+# Inline credentials & certificates
+# <auth-user-pass>
+# USERNAME
+# PASSWORD
+# </auth-user-pass>
+#
 # <ca>
 # -----BEGIN CERTIFICATE-----
 # PLACEHOLDER
